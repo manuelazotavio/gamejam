@@ -8,58 +8,6 @@
  */
 
 
-function validaCPF($cpf)
-{
-    $cpf = preg_replace("/[^0-9]/is", "", $cpf);
-
-    if (strlen($cpf) != 11) {
-        return false;
-    }
-
-    if (preg_match('/(\d)\1{10}/', $cpf)) {
-        return false;
-    }
-
-    for ($t = 9; $t < 11; $t++) {
-        for ($d = 0, $c = 0; $c < $t; $c++) {
-            $d += $cpf[$c] * ($t + 1 - $c);
-        }
-        $d = ((10 * $d) % 11) % 10;
-        if ($cpf[$c] != $d) {
-            return false;
-        }
-    }
-    return true;
-}
-
-
-function ig_handle_controle_votacao_post()
-{
-
-    if (isset($_POST['action']) && $_POST['action'] === 'ig_change_status' && isset($_POST['ig_change_status_nonce']) && wp_verify_nonce($_POST['ig_change_status_nonce'], 'ig_change_status_action')) {
-
-
-        if (!current_user_can('gerenciar_mostra')) {
-            wp_die('Permissão negada.');
-        }
-
-
-        $status_atual = get_option('ig_votacao_status');
-        $novo_status = ($status_atual === 'aberta') ? 'encerrada' : 'aberta';
-
-
-        update_option('ig_votacao_status', $novo_status);
-
-
-        $redirect_url = wp_get_referer();
-        $redirect_url = add_query_arg('status_changed', '1', $redirect_url);
-
-        wp_safe_redirect($redirect_url);
-        exit();
-    }
-}
-
-add_action('init', 'ig_handle_controle_votacao_post');
 
 function ig_calcular_resultados()
 {
